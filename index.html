@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gym Booklet</title>
+    <style>
+        body {
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.container {
+    width: 95vw;
+    max-width: 1500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.book-wrapper {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+}
+
+.my-page {
+    background-color: white;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.my-page img {
+    object-fit: contain;
+    object-position: center bottom;  /* ← this is what you need */
+    width: 100%;
+    height: 100%;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin: 0 10px;
+    font-size: 16px;
+}
+
+.controls button:hover {
+    background-color: #0056b3;
+}
+
+.controls select {
+    font-size: 16px;
+    padding: 5px;
+    margin: 0 10px;
+}
+
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="book" class="book-wrapper"></div>
+        <div class="controls">
+            <button type="button" class="btn-prev">Previous page</button>
+            <select id="page-selector"></select>
+            <button type="button" class="btn-next">Next page</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+    const bookElement = document.getElementById('book');
+    const prevButton = document.querySelector('.btn-prev');
+    const nextButton = document.querySelector('.btn-next');
+    const pageSelector = document.getElementById('page-selector');
+    let htmlContent = '';
+
+    // Loop to load images
+    for (let i = 1; i <= 64; i++) {
+        const src = `Assets/theGymBooklet_digital_${i}.jpeg`; //Replace the path here
+        htmlContent += `
+            <div class="my-page">
+                <img src="${src}" alt="Page ${i}">
+            </div>
+        `;
+    }
+
+    bookElement.innerHTML = htmlContent;
+
+    setTimeout(() => {
+        const pageFlip = new St.PageFlip(bookElement, {
+            width: 388,
+            height: 551,
+            size: 'stretch',
+            usePortrait: true,
+            minWidth: 300,
+            maxWidth: 1000,
+            minHeight: 400,
+            maxHeight: 1200,
+            showCover: true,
+            maxShadowOpacity: 0.5,
+            mobileScrollSupport: false
+        });
+
+        pageFlip.loadFromHTML(document.querySelectorAll('.my-page'));
+
+        // --- New Dropdown Logic ---
+
+        // Populate the page selector dropdown
+        const totalPages = pageFlip.getPageCount();
+        for (let i = 0; i < totalPages; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `Page ${i + 1}`;
+            pageSelector.appendChild(option);
+        }
+
+        // Update the select dropdown when the page is flipped
+        pageFlip.on('flip', (e) => {
+            pageSelector.value = e.data;
+        });
+
+        // Flip the page when a new option is selected
+        pageSelector.addEventListener('change', (e) => {
+            const newPage = parseInt(e.target.value, 10);
+            pageFlip.flip(newPage);
+        });
+
+        // Set initial state
+        pageSelector.value = pageFlip.getCurrentPageIndex();
+
+        // --- Button Event Listeners ---
+        prevButton.addEventListener('click', () => {
+            pageFlip.flipPrev();
+        });
+
+        nextButton.addEventListener('click', () => {
+            pageFlip.flipNext();
+        });
+
+    }, 100);
+});
+        
+    </script>
+
+</body>
+</html>
